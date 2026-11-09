@@ -83,6 +83,50 @@ label input,label select{margin-top:4px;color:var(--text);font-size:16px}
 .note{font-size:13px;color:var(--muted);margin:6px 2px}
 #toast{position:fixed;left:50%;bottom:calc(140px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#222;color:#fff;padding:10px 16px;border-radius:20px;font-size:14px;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.show{opacity:.95}
+/* ---- design refresh ---- */
+html,body{font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.brand{display:flex;align-items:baseline;font-size:34px;font-weight:800;letter-spacing:-1.5px;color:var(--text);margin:8px 0 14px;line-height:1}
+.coin{width:.8em;height:.8em;margin:0 -1px -.05em 1px;color:var(--accent);flex:none}
+.card{border-radius:22px;box-shadow:0 2px 14px rgba(15,60,45,.07)}
+.card.sum{background:linear-gradient(135deg,#19b78e,#0a6b52);color:#fff;padding:18px;box-shadow:0 10px 24px rgba(15,143,111,.35)}
+.sum .lbl,.sum .sub{color:rgba(255,255,255,.85)}
+.sum .big{font-size:40px;letter-spacing:-1.5px;margin:4px 0 10px}
+.sum .bar{background:rgba(255,255,255,.28);height:12px}
+.sum .bar i{background:#fff}
+.sum .bar i.over{background:#ffb3b3}
+.seg{background:var(--accent2);box-shadow:none;border-radius:16px;padding:4px}
+.seg button{border-radius:12px}
+.seg button.on{background:var(--card);color:var(--accent);box-shadow:0 1px 5px rgba(0,0,0,.14)}
+.nav button{background:var(--card);box-shadow:0 1px 6px rgba(15,60,45,.1)}
+.item{border-radius:18px;box-shadow:0 1px 8px rgba(15,60,45,.06)}
+.item .dot,.crow .dot{border-radius:14px}
+.dayh{text-transform:uppercase;letter-spacing:.04em;font-size:12px}
+.tab{border-top:0;box-shadow:0 -6px 20px rgba(0,0,0,.09);border-radius:24px 24px 0 0}
+.tab button b{display:block;line-height:1.3;padding:1px 20px;border-radius:14px}
+.tab button.on b{background:var(--accent2)}
+.fab{background:linear-gradient(135deg,#19b78e,#0a6b52);box-shadow:0 10px 22px rgba(15,143,111,.45)}
+.btn{border-radius:14px}
+.btn.pri{background:linear-gradient(135deg,#19b78e,#0a6b52);color:#fff}
+#sheet .pn{border-radius:26px 26px 0 0}
+.nav .pl{background:none;box-shadow:none;border-radius:12px;height:40px;font-size:17px}
+.btn[data-a=report]{background:var(--card);color:var(--accent);box-shadow:0 1px 8px rgba(15,60,45,.1)}
+#printArea{display:none}
+#printArea h1{font-size:22px;margin:0 0 2px;color:#0f8f6f}
+#printArea h2{font-size:16px;margin:18px 0 6px;color:#0f8f6f}
+#printArea .sub2{color:#555;font-size:13px;margin:0 0 4px}
+#printArea table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:6px}
+#printArea th{background:#0f8f6f;color:#fff;text-align:left;padding:5px 7px}
+#printArea td{border:1px solid #c9d3ce;padding:4px 7px}
+#printArea th.r,#printArea td.r{text-align:right}
+#printArea tr.tot td{font-weight:700;background:#e3f4ee}
+#printArea tr{break-inside:avoid}
+@media print{
+ @page{size:A4;margin:14mm}
+ body.printing{background:#fff!important;color:#000!important}
+ body.printing #app,body.printing .tab,body.printing .fab,body.printing #sheet,body.printing #toast{display:none!important}
+ body.printing #printArea{display:block}
+ #printArea th,#printArea tr.tot td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
@@ -95,6 +139,7 @@ label input,label select{margin-top:4px;color:var(--text);font-size:16px}
 </div>
 <div id="sheet"></div>
 <div id="toast"></div>
+<div id="printArea"></div>
 <input type="file" id="imp" accept="application/json,.json" hidden>
 
 <script>
@@ -127,6 +172,8 @@ const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','De
 const MONL=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DOW=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
+const COIN='<svg class="coin" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="48" fill="currentColor"/><g fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><path d="M41 28V72" stroke-width="8"/><path d="M41 28H52a13 13 0 0 1 0 26H41" stroke-width="8"/><path d="M31 38H63M31 47H63" stroke-width="5"/></g></svg>';
+function brand(){return '<div class="brand" aria-label="Gastos"><span>Gast</span>'+COIN+'<span>s</span></div>'}
 let V={mode:'month',date:todayStr(),tab:'home'};
 let F={};
 
@@ -187,16 +234,17 @@ function home(){
   let days=Math.round((e-s)/864e5)+1;
   if(s<=now&&now<e)days=Math.round((now-s)/864e5)+1;
   const name={day:'day',week:'week',month:'month'}[V.mode];
-  let h=`<h1>Gastos</h1>
+  let h=brand()+`
   <div class="nav"><button data-a="prev" aria-label="Previous">‹</button><button class="pl" data-a="today">${esc(periodLabel())}</button><button data-a="next" aria-label="Next">›</button></div>
   <div class="seg">${['day','week','month'].map(m=>`<button class="${V.mode===m?'on':''}" data-a="mode" data-m="${m}">${m[0].toUpperCase()+m.slice(1)}</button>`).join('')}</div>
-  <div class="card"><div class="lbl">Spent this ${name}</div><div class="big">${fmt(total)}</div>`;
+  <div class="card sum"><div class="lbl">Spent this ${name}</div><div class="big">${fmt(total)}</div>`;
   if(B){
     h+=`<div class="bar"><i class="${total>B?'over':''}" style="width:${Math.min(100,total/B*100)}%"></i></div>
     <div class="sub">${total>B?fmt(total-B)+' over budget':fmt(B-total)+' left of '+fmt(B)}</div>`;
   }else h+=`<div class="sub">Set a monthly budget in Settings to see what's left.</div>`;
   if(V.mode!=='day'&&total>0)h+=`<div class="sub">Average per day: ${fmt(total/days)}</div>`;
   h+=`</div>`;
+  if(total>0)h+=`<button class="btn" style="width:100%;margin-bottom:12px" data-a="report">📄 Report (Word / Print)</button>`;
 
   if(V.mode!=='day'&&total>0){
     const sums={};list.forEach(x=>sums[x.date]=(sums[x.date]||0)+x.amt);
@@ -297,7 +345,18 @@ function billForm(id){
 }
 
 /* ---------- actions ---------- */
-function dl(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+function dl(name,data,type){
+  const blob=new Blob([data],{type:type});
+  const plain=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
+  const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||(/Mac/.test(navigator.platform||'')&&navigator.maxTouchPoints>1);
+  try{
+    if(mobile&&navigator.canShare&&window.File){
+      const f=new File([blob],name,{type:type});
+      if(navigator.canShare({files:[f]})){navigator.share({files:[f],title:name}).catch(e=>{if(!e||e.name!=='AbortError')plain()});return}
+    }
+  }catch(e){}
+  plain();
+}
 const A={
   tab(d){V.tab=d.t;render();window.scrollTo(0,0)},
   mode(d){V.mode=d.m;render()},
@@ -346,6 +405,125 @@ const A={
   import(){$('#imp').click()},
   reset(){if(confirm('Erase ALL expenses, bills and settings on this device? This cannot be undone.')){S=fresh();save();render();toast('All data erased')}}
 };
+/* ---------- reports (Word + print) ---------- */
+const DOCX_MIME='application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+function fullLabel(){const s=range()[0];if(V.mode==='day')return DOW[s.getDay()]+', '+MON[s.getMonth()]+' '+s.getDate()+', '+s.getFullYear();return periodLabel()}
+function shortDate(ds){const d=parse(ds);return DOW[d.getDay()]+', '+MON[d.getMonth()]+' '+d.getDate()}
+function reportData(){
+  const r=range(),s=r[0],e=r[1];
+  const list=entries(s,e).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  const total=list.reduce((a,x)=>a+x.amt,0);
+  const now=new Date();now.setHours(0,0,0,0);
+  let days=Math.round((e-s)/864e5)+1;
+  if(s<=now&&now<e)days=Math.round((now-s)/864e5)+1;
+  const by={};list.forEach(x=>by[x.cat]=(by[x.cat]||0)+x.amt);
+  const cats=Object.keys(by).sort((a,b)=>by[b]-by[a]).map(id=>({name:catOf(id).name,amt:by[id]}));
+  const dd={};list.forEach(x=>dd[x.date]=(dd[x.date]||0)+x.amt);
+  const daily=Object.keys(dd).sort().map(d=>({date:d,amt:dd[d]}));
+  const g=new Date();
+  return {mode:V.mode,kind:{day:'Daily',week:'Weekly',month:'Monthly'}[V.mode],label:fullLabel(),list:list,total:total,B:budgetFor(s),days:days,cats:cats,daily:daily,
+    key:V.mode==='month'?iso(s).slice(0,7):iso(s),count:list.length,gen:MON[g.getMonth()]+' '+g.getDate()+', '+g.getFullYear()};
+}
+function sections(R){
+  const sum=[['Total spent',fmt(R.total)]];
+  if(R.B){sum.push(['Budget for this period',fmt(R.B)]);sum.push([R.total>R.B?'Over budget by':'Remaining budget',fmt(Math.abs(R.B-R.total))])}
+  if(R.mode!=='day')sum.push(['Average per day',fmt(R.total/R.days)]);
+  sum.push(['Number of entries',String(R.count)]);
+  const out=[
+    {title:'Summary',head:null,rows:sum,align:['l','r'],widths:[4946,4800],total:false},
+    {title:'Spending by category',head:['Category','Amount','Share'],rows:R.cats.map(c=>[c.name,fmt(c.amt),(R.total?c.amt/R.total*100:0).toFixed(1)+'%']).concat([['Total',fmt(R.total),'100%']]),align:['l','r','r'],widths:[4946,2800,2000],total:true}
+  ];
+  if(R.mode!=='day')out.push({title:'Daily totals',head:['Date','Amount'],rows:R.daily.map(d=>[shortDate(d.date),fmt(d.amt)]).concat([['Total',fmt(R.total)]]),align:['l','r'],widths:[5946,3800],total:true});
+  out.push({title:'All entries',head:['Date','Category','Note','Amount'],rows:R.list.map(x=>[shortDate(x.date),catOf(x.cat).name,(x.note||'')+(x.rec?(x.note?' ':'')+'(recurring)':''),fmt(x.amt)]).concat([['','','Total',fmt(R.total)]]),align:['l','l','l','r'],widths:[1700,2200,3746,2100],total:true});
+  return out;
+}
+function reportHTML(R){
+  let h='<h1>Gastos</h1><div style="font-size:17px;font-weight:700">'+esc(R.kind)+' Expense Report</div><div style="font-size:15px">'+esc(R.label)+'</div><div class="sub2">Generated '+esc(R.gen)+'</div>';
+  sections(R).forEach(sec=>{
+    h+='<h2>'+esc(sec.title)+'</h2><table>';
+    if(sec.head)h+='<thead><tr>'+sec.head.map((c,i)=>'<th class="'+(sec.align[i]==='r'?'r':'')+'">'+esc(c)+'</th>').join('')+'</tr></thead>';
+    h+='<tbody>'+sec.rows.map((r,ri)=>'<tr'+(sec.total&&ri===sec.rows.length-1?' class="tot"':'')+'>'+r.map((c,i)=>'<td class="'+(sec.align[i]==='r'?'r':'')+'">'+esc(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
+  });
+  return h;
+}
+/* --- minimal .docx writer (no libraries) --- */
+const CRCT=(function(){const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0}return t})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRCT[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function zipStore(files){
+  const enc=new TextEncoder(),parts=[],cen=[];let off=0;
+  const u16=n=>[n&255,(n>>>8)&255];
+  const u32=n=>[n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255];
+  files.forEach(f=>{
+    const nm=enc.encode(f.name),data=enc.encode(f.text),crc=crc32(data),sz=data.length;
+    const lh=[0x50,0x4b,3,4].concat(u16(20),u16(0),u16(0),u16(0),u16(0x21),u32(crc),u32(sz),u32(sz),u16(nm.length),u16(0));
+    parts.push(new Uint8Array(lh),nm,data);
+    cen.push({nm:nm,crc:crc,sz:sz,off:off});
+    off+=lh.length+nm.length+sz;
+  });
+  const cd=[];let cdSize=0;
+  cen.forEach(c=>{
+    const h=[0x50,0x4b,1,2].concat(u16(20),u16(20),u16(0),u16(0),u16(0),u16(0x21),u32(c.crc),u32(c.sz),u32(c.sz),u16(c.nm.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(c.off));
+    cd.push(new Uint8Array(h),c.nm);cdSize+=h.length+c.nm.length;
+  });
+  const end=[0x50,0x4b,5,6].concat(u16(0),u16(0),u16(cen.length),u16(cen.length),u32(cdSize),u32(off),u16(0));
+  const all=parts.concat(cd,[new Uint8Array(end)]);
+  let n=0;all.forEach(p=>n+=p.length);
+  const out=new Uint8Array(n);let o=0;all.forEach(p=>{out.set(p,o);o+=p.length});
+  return out;
+}
+function xe(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function wp(text,o){
+  o=o||{};
+  return '<w:p><w:pPr>'+(o.keep?'<w:keepNext/>':'')+'<w:spacing w:before="'+(o.before||0)+'" w:after="'+(o.after==null?80:o.after)+'"/>'+(o.align?'<w:jc w:val="'+o.align+'"/>':'')+'</w:pPr><w:r><w:rPr>'+(o.bold?'<w:b/>':'')+(o.color?'<w:color w:val="'+o.color+'"/>':'')+'<w:sz w:val="'+(o.size||21)+'"/></w:rPr><w:t xml:space="preserve">'+xe(text)+'</w:t></w:r></w:p>';
+}
+function wtc(w,text,o){
+  return '<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'+(o.fill?'<w:shd w:val="clear" w:color="auto" w:fill="'+o.fill+'"/>':'')+'<w:vAlign w:val="center"/></w:tcPr>'+wp(text,{bold:o.bold,color:o.color,size:20,align:o.align,after:0})+'</w:tc>';
+}
+function wtable(sec){
+  const bd=['top','left','bottom','right','insideH','insideV'].map(k=>'<w:'+k+' w:val="single" w:sz="4" w:space="0" w:color="C9D3CE"/>').join('');
+  const al=a=>a==='r'?'right':'left';
+  let x='<w:tbl><w:tblPr><w:tblW w:w="9746" w:type="dxa"/><w:tblBorders>'+bd+'</w:tblBorders><w:tblLayout w:type="fixed"/><w:tblCellMar><w:top w:w="50" w:type="dxa"/><w:left w:w="100" w:type="dxa"/><w:bottom w:w="50" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>'+sec.widths.map(w=>'<w:gridCol w:w="'+w+'"/>').join('')+'</w:tblGrid>';
+  if(sec.head)x+='<w:tr><w:trPr><w:cantSplit/><w:tblHeader/></w:trPr>'+sec.head.map((h,i)=>wtc(sec.widths[i],h,{fill:'0F8F6F',color:'FFFFFF',bold:1,align:al(sec.align[i])})).join('')+'</w:tr>';
+  sec.rows.forEach((r,ri)=>{
+    const last=sec.total&&ri===sec.rows.length-1;
+    x+='<w:tr><w:trPr><w:cantSplit/></w:trPr>'+r.map((c,i)=>wtc(sec.widths[i],c,{bold:last||(!sec.head&&i===0),fill:last?'E3F4EE':(!sec.head&&i===0?'F3F6F5':''),align:al(sec.align[i])})).join('')+'</w:tr>';
+  });
+  return x+'</w:tbl>';
+}
+function docxBytes(R){
+  const W='http://schemas.openxmlformats.org/wordprocessingml/2006/main';
+  const H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  let b=wp('Gastos',{bold:1,size:44,color:'0F8F6F',after:0})+wp(R.kind+' Expense Report',{bold:1,size:30,after:0})+wp(R.label,{size:24,after:20})+wp('Generated '+R.gen,{size:18,color:'6B7A74',after:160});
+  sections(R).forEach(sec=>{b+=wp(sec.title,{bold:1,size:26,color:'0F8F6F',before:200,after:100,keep:1})+wtable(sec)+wp('',{after:60})});
+  const doc=H+'<w:document xmlns:w="'+W+'"><w:body>'+b+'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080" w:header="720" w:footer="720" w:gutter="0"/></w:sectPr></w:body></w:document>';
+  const styles=H+'<w:styles xmlns:w="'+W+'"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:cs="Calibri" w:eastAsia="Calibri"/><w:sz w:val="21"/><w:szCs w:val="21"/><w:lang w:val="en-PH"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="80" w:line="259" w:lineRule="auto"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style><w:style w:type="table" w:default="1" w:styleId="TableNormal"><w:name w:val="Normal Table"/><w:uiPriority w:val="99"/><w:semiHidden/><w:unhideWhenUsed/><w:tblPr><w:tblInd w:w="0" w:type="dxa"/><w:tblCellMar><w:top w:w="0" w:type="dxa"/><w:left w:w="108" w:type="dxa"/><w:bottom w:w="0" w:type="dxa"/><w:right w:w="108" w:type="dxa"/></w:tblCellMar></w:tblPr></w:style></w:styles>';
+  const PK='http://schemas.openxmlformats.org/package/2006/relationships';
+  const OD='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  return zipStore([
+    {name:'[Content_Types].xml',text:H+'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>'},
+    {name:'_rels/.rels',text:H+'<Relationships xmlns="'+PK+'"><Relationship Id="rId1" Type="'+OD+'/officeDocument" Target="word/document.xml"/></Relationships>'},
+    {name:'word/document.xml',text:doc},
+    {name:'word/styles.xml',text:styles},
+    {name:'word/_rels/document.xml.rels',text:H+'<Relationships xmlns="'+PK+'"><Relationship Id="rId1" Type="'+OD+'/styles" Target="styles.xml"/></Relationships>'}
+  ]);
+}
+Object.assign(A,{
+  report(){
+    const R=reportData();
+    if(!R.count){toast('No expenses in this period');return}
+    sheet('<h3>'+esc(R.kind)+' report</h3><div class="note" style="margin:-6px 0 14px">Covers '+esc(R.label)+' · '+R.count+' entries. To change the period, close this and switch Day / Week / Month.</div><div class="row"><button class="btn pri" data-a="docx">Save as Word (.docx)</button></div><div class="row"><button class="btn" data-a="print">Print / Save as PDF</button></div><div class="row"><button class="btn" data-a="close">Cancel</button></div>');
+  },
+  docx(){const R=reportData();closeSheet();dl('gastos-report-'+R.mode+'-'+R.key+'.docx',docxBytes(R),DOCX_MIME)},
+  print(){
+    const R=reportData();
+    $('#printArea').innerHTML=reportHTML(R);
+    document.body.classList.add('printing');
+    closeSheet();
+    setTimeout(()=>window.print(),150);
+  }
+});
+window.addEventListener('afterprint',()=>{document.body.classList.remove('printing');$('#printArea').innerHTML=''});
+
 document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;const f=A[t.dataset.a];if(f)f(t.dataset)});
 document.addEventListener('change',e=>{
   if(e.target.id==='s-cur'){S.settings.currency=e.target.value.trim()||'₱';save()}
