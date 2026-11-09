@@ -1,0 +1,2 @@
+# Gastos
+Simple Expenses Tracker
